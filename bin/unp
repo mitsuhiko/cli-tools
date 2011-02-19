@@ -1,0 +1,32 @@
+#!/bin/sh
+#   unp
+#   ~~~
+#
+#   Helper script for unpacking archives of any kind.
+#   It detects the archive by file extension so make
+#
+#   :copyright: (c) Copyright 2011 by Armin Ronacher
+#   :license: BSD, see LICENSE for more details
+#
+
+if [ x == x$1 ]; then
+  echo 'usage: unp [filenames]'
+else
+  for fn in "$@"; do
+    if [ -f "$fn" ]; then
+      case "$fn" in
+        *.tar.gz)          tar xvzf "$fn" ;;
+        *.tgz)             tar xvzf "$fn" ;;
+        *.tar.bz2)         tar xvjf "$fn" ;;
+        *.gz)              gunzip "$fn" ;;
+        *.bz2)             bunzip2 "$fn" ;;
+        *.tar)             tar zvf "$fn" ;;
+        *.zip|*.egg|*.jar) unzip "$fn" ;;
+        *.rar)             unrar e "$fn" ;;
+        *) echo "error: '$fn' is an unknown archive" ;;
+      esac
+    else
+      echo "error: '$fn' is not a valid archive"
+    fi
+  done
+fi

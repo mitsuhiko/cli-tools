@@ -1,0 +1,4 @@
+Various command line utilities.
+
+unp           unpacks things
+json-tool     colorizes JSON
