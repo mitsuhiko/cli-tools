@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #   unp
 #   ~~~
 #
@@ -12,15 +12,25 @@
 if [ x == x$1 ]; then
   echo 'usage: unp [filenames]'
 else
+
+  # Check for GNU Tar on systems that don't have it by default. (Solaris)
+  type "gtar" &>/dev/null;
+
+  if [ $? == 0 ]; then
+    TAR="gtar"
+  else
+    TAR="tar"
+  fi
+
   for fn in "$@"; do
     if [ -f "$fn" ]; then
       case "$fn" in
-        *.tar.gz)          tar xvzf "$fn" ;;
-        *.tgz)             tar xvzf "$fn" ;;
-        *.tar.bz2)         tar xvjf "$fn" ;;
+        *.tar.gz)          $TAR xvzf "$fn" ;;
+        *.tgz)             $TAR xvzf "$fn" ;;
+        *.tar.bz2)         $TAR xvjf "$fn" ;;
         *.gz)              gunzip "$fn" ;;
         *.bz2)             bunzip2 "$fn" ;;
-        *.tar)             tar zvf "$fn" ;;
+        *.tar)             $TAR zvf "$fn" ;;
         *.zip|*.egg|*.jar) unzip "$fn" ;;
         *.rar)             unrar e "$fn" ;;
         *) echo "error: '$fn' is an unknown archive" ;;
