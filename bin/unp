@@ -17,9 +17,9 @@ else
   type "gtar" &>/dev/null;
 
   if [ $? == 0 ]; then
-    TAR="gtar"
+    TAR=gtar
   else
-    TAR="tar"
+    TAR=tar
   fi
 
   for fn in "$@"; do
@@ -30,7 +30,7 @@ else
         *.tar.bz2)         $TAR xvjf "$fn" ;;
         *.gz)              gunzip "$fn" ;;
         *.bz2)             bunzip2 "$fn" ;;
-        *.tar)             $TAR zvf "$fn" ;;
+        *.tar)             $TAR xvf "$fn" ;;
         *.zip|*.egg|*.jar) unzip "$fn" ;;
         *.rar)             unrar e "$fn" ;;
         *) echo "error: '$fn' is an unknown archive" ;;
