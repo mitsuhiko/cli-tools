@@ -21,6 +21,7 @@
 """
 import sys
 from optparse import OptionParser
+from StringIO import StringIO
 
 try:
     import simplejson as json
@@ -50,6 +51,17 @@ def main():
     parser.add_option('-i', '--indentation', dest='indent', type=int,
                       default=2,
                       help='Number of spaces to use for indentation')
+    parser.add_option('-l', '--list-process', dest='list_process',
+                      action='store_true', help='process on a line '
+                      'separated list of JSON objects')
+    parser.add_option('-T', '--strip-tab', dest='strip_tab',
+                      action='store_true',
+                      help='Strip up to leading tab when doing list processing')
+    parser.add_option('-t', '--strip-and-print=tab', dest='strip_and_print_tab',
+                      action='store_true', help='Like -T but prints')
+    parser.add_option('-N', '--extra-newline', dest='extra_newline',
+                      action='store_true', help='print an extra '
+                      'newline at the end')
     options, args = parser.parse_args()
     if len(args) > 1:
         parser.error('Too many arguments')
@@ -57,11 +69,26 @@ def main():
         stream = sys.stdin
     else:
         stream = open(args[0])
-    try:
-        json_data = json.load(stream)
-    except Exception, e:
-        parser.error('Could not read json:\n  %s' % e)
-    print_formatted_json(sys.stdout, json_data, options.indent)
+
+    def highlight(stream):
+        try:
+            json_data = json.load(stream)
+        except Exception, e:
+            parser.error('Could not read json:\n  %s' % e)
+        print_formatted_json(sys.stdout, json_data, options.indent)
+        if options.extra_newline:
+            sys.stdout.write('\n')
+
+    if options.list_process:
+        for line in stream:
+            if options.strip_tab or options.strip_and_print_tab:
+                if '\t' in line:
+                    tab, line = line.split('\t', 1)
+                    if options.strip_and_print_tab:
+                        sys.stdout.write(tab + '\t')
+            highlight(StringIO(line))
+    else:
+        highlight(stream)
 
 
 if __name__ == '__main__':
