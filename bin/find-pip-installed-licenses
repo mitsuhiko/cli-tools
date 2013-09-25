@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+from pkg_resources import working_set
+
+LICENSE_LINE = 'Classifier: License :: '
+
+LICENSE_GROUP = {
+    'DFSG approved': 'DFSG',
+    'OSI Approved': 'OSI',
+}
+
+GPL_FAMILY = set([
+    'OSI Approved :: GNU Affero General Public License v3',
+    'OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+    #'OSI Approved :: GNU Free Documentation License (FDL)',
+    'OSI Approved :: GNU General Public License (GPL)',
+    'OSI Approved :: GNU General Public License v2 (GPLv2)',
+    'OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
+    'OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+    #'OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
+    #'OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
+    #'OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
+    #'OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+    #'OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+])
+
+QUESTIONABLE_LICENSES = set([
+    'OSI Approved :: MITRE Collaborative Virtual Workspace License (CVW)',
+    'OSI Approved :: Motosoto License',
+    'OSI Approved :: Ricoh Source Code Public License',
+])
+
+LICENSE_MAPPING = {
+    'Aladdin Free Public License (AFPL)': 'Aladdin Free Public License',
+    'CC0 1.0 Universal (CC0 1.0) Public Domain Dedication': 'CC0 1.0',
+    'Eiffel Forum License (EFL)': 'Eiffel Forum License',
+    'Netscape Public License (NPL)': 'Netscape Public License',
+    'Nokia Open Source License (NOKOS)': 'Nokia Open Source License',
+    'OSI Approved :: Academic Free License (AFL)': 'Academic Free License',
+    'OSI Approved :: Apache Software License': 'Apache Software License',
+    'OSI Approved :: Apple Public Source License': 'Apple Public Source License',
+    'OSI Approved :: Artistic License': 'Artistic License',
+    'OSI Approved :: Attribution Assurance License': 'Attribution Assurance License',
+    'OSI Approved :: BSD License': 'BSD',
+    'OSI Approved :: Common Public License': 'Common Public License',
+    'OSI Approved :: Eiffel Forum License': 'Eiffel Forum License',
+    'OSI Approved :: European Union Public Licence 1.0 (EUPL 1.0)': 'European Union Public License 1.0',
+    'OSI Approved :: European Union Public Licence 1.1 (EUPL 1.1)': 'European Union Public License 1.1',
+    'OSI Approved :: GNU Affero General Public License v3': 'GNU AGPLv3',
+    'OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)': 'GNU AGPLv3+',
+    'OSI Approved :: GNU Free Documentation License (FDL)': 'FDL',
+    'OSI Approved :: GNU General Public License (GPL)': 'GNU GPL',
+    'OSI Approved :: GNU General Public License v2 (GPLv2)': 'GNU GPLv2',
+    'OSI Approved :: GNU General Public License v2 or later (GPLv2+)': 'GNU GPLv2+',
+    'OSI Approved :: GNU General Public License v3 (GPLv3)': 'GNU GPLv3',
+    'OSI Approved :: GNU General Public License v3 or later (GPLv3+)': 'GNU GPLv3+',
+    'OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)': 'GNU LGPLv2',
+    'OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)': 'GNU LGPLv2+',
+    'OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)': 'GNU LGPLv3',
+    'OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)': 'GNU LGPLv3+',
+    'OSI Approved :: GNU Library or Lesser General Public License (LGPL)': 'GNU LGPL',
+    'OSI Approved :: IBM Public License': 'IBM Public License',
+    'OSI Approved :: Intel Open Source License': 'Intel Open Source License',
+    'OSI Approved :: ISC License (ISCL)': 'ISIC License',
+    'OSI Approved :: Jabber Open Source License': 'Jabber Open Source License',
+    'OSI Approved :: MIT License': 'MIT',
+    'OSI Approved :: MITRE Collaborative Virtual Workspace License (CVW)': 'MITRE Collaborative Virtual Workspace License',
+    'OSI Approved :: Motosoto License': 'Motosoto License',
+    'OSI Approved :: Mozilla Public License 1.0 (MPL)': 'MPL 1.0',
+    'OSI Approved :: Mozilla Public License 1.1 (MPL 1.1)': 'MPL 1.1',
+    'OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)': 'MPL 2.0',
+    'OSI Approved :: Nethack General Public License': 'Nethack General Public License',
+    'OSI Approved :: Nokia Open Source License': 'Nokia Open Source License',
+    'OSI Approved :: Open Group Test Suite License': 'Open Group Test Suite License',
+    'OSI Approved :: Python License (CNRI Python License)': 'Python License',
+    'OSI Approved :: Python Software Foundation License': 'Python Softare Foundation License',
+    'OSI Approved :: Qt Public License (QPL)': 'Qt Public License',
+    'OSI Approved :: Ricoh Source Code Public License': 'Ricoh Source Code Public License',
+    'OSI Approved :: Sleepycat License': 'Sleepycat License',
+    'OSI Approved :: Sun Industry Standards Source License (SISSL)': 'SISSL',
+    'OSI Approved :: Sun Public License': 'Sun Public License',
+    'OSI Approved :: University of Illinois/NCSA Open Source License': 'University of Illinois/NCSA Open Source License',
+    'OSI Approved :: Vovida Software License 1.0': 'Vovida Software License 1.0',
+    'OSI Approved :: W3C License': 'W3C License',
+    'OSI Approved :: X.Net License': 'X.Net License',
+    'OSI Approved :: zlib/libpng License': 'zlib',
+    'OSI Approved :: Zope Public License': 'Zope Public License',
+    'Public Domain': 'Public Domain',
+    'Repoze Public License': 'Repoze Public License',
+}
+
+
+def find_licenses():
+    for distribution in working_set:
+        pkg_info = distribution.get_metadata('PKG-INFO')
+        licenses = []
+        if pkg_info:
+            for line in pkg_info.splitlines():
+                if line.startswith(LICENSE_LINE):
+                    licenses.append(line[len(LICENSE_LINE):].lstrip())
+            if not licenses:
+                licenses = []
+        short_licenses = set()
+        is_gpl = False
+        fallback_group = 'Unknown'
+        for license in licenses:
+            if license in LICENSE_GROUP:
+                fallback_group = LICENSE_GROUP[license]
+            short_name = LICENSE_MAPPING.get(license)
+            if short_name is None:
+                short_name = license
+            short_licenses.add(short_name)
+            if license in GPL_FAMILY:
+                is_gpl = True
+        if not short_licenses:
+            short_licenses.add(fallback_group)
+        yield distribution.egg_name(), {
+            'licenses': sorted(short_licenses),
+            'is_gpl': is_gpl,
+        }
+
+
+def main():
+    license_groups = {}
+    gpl_touched = set()
+    for egg, info in find_licenses():
+        for license in info['licenses']:
+            license_groups.setdefault(license, set()).add(egg)
+        if info['is_gpl']:
+            gpl_touched.add(egg)
+
+    license_groups = sorted(license_groups.items())
+    for license, eggs in license_groups:
+        print license
+        for egg in sorted(eggs):
+            print '  %s' % egg
+
+    if gpl_touched:
+        print
+        print 'GPL touched:'
+        for egg in sorted(gpl_touched):
+            print '  %s' % egg
+
+
+if __name__ == '__main__':
+    main()

@@ -1,4 +1,6 @@
 Various command line utilities.
 
-unp           unpacks things
-json-tool     colorizes JSON
+unp                           unpacks things
+json-tool                     colorizes JSON
+find-pip-installed-licenses   prints license info from pip
+open-smb-share                takes a \\unc path and opens it in finder
