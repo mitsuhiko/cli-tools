@@ -25,15 +25,15 @@ else
   for fn in "$@"; do
     if [ -f "$fn" ]; then
       case "$fn" in
-        *.tar.gz)          $TAR xvzf "$fn" ;;
-        *.tgz)             $TAR xvzf "$fn" ;;
-        *.tar.bz2)         $TAR xvjf "$fn" ;;
-        *.gz)              gunzip "$fn" ;;
-        *.bz2)             bunzip2 "$fn" ;;
-        *.tar)             $TAR xvf "$fn" ;;
-        *.zip|*.egg|*.jar) unzip "$fn" ;;
-        *.rar)             unrar e "$fn" ;;
-        *.7z)              7z x "$fn" ;;
+        *.tar.gz)                $TAR xvzf "$fn" ;;
+        *.tgz)                   $TAR xvzf "$fn" ;;
+        *.tar.bz2)               $TAR xvjf "$fn" ;;
+        *.gz)                    gunzip "$fn" ;;
+        *.bz2)                   bunzip2 "$fn" ;;
+        *.tar)                   $TAR xvf "$fn" ;;
+        *.zip|*.egg|*.jar|*.whl) unzip "$fn" ;;
+        *.rar)                   unrar e "$fn" ;;
+        *.7z)                    7z x "$fn" ;;
         *) echo "error: '$fn' is an unknown archive" ;;
       esac
     else
